@@ -1,0 +1,267 @@
+// src/App.jsx
+import { useEffect, useState } from "react";
+import "./index.css";
+import "./App.css";
+
+import { Topbar } from "./components/Topbar";
+import { Sidebar } from "./components/Sidebar";
+import { StatCard } from "./components/StatCard";
+import { PopulationChart } from "./components/PopulationChart";
+import { DataTable } from "./components/DataTable";
+import { YearFilter } from "./components/YearFilter";
+import { CountrySelect } from "./components/CountrySelect";
+import TopCountriesPanel from "./components/TopCountriesPanel";
+
+const nf = new Intl.NumberFormat("es-ES");
+
+export default function App() {
+  // Controles de UI
+  const [selectedCountry, setSelectedCountry] = useState({ id: "", name: "" });
+  const [yearFrom, setYearFrom] = useState("");
+  const [yearTo, setYearTo] = useState("");
+
+  // Filtros aplicados (los que usa la tabla)
+  const [appliedCountryId, setAppliedCountryId] = useState("");     // FIX: por id ISO3
+  const [appliedCountryName, setAppliedCountryName] = useState("");
+  const [appliedFrom, setAppliedFrom] = useState("");
+  const [appliedTo, setAppliedTo] = useState("");
+
+  // Países/Agregados desde la API
+  const [countries, setCountries] = useState([]);
+  const [loadingCountries, setLoadingCountries] = useState(false);
+  const [countriesError, setCountriesError] = useState("");
+
+  // KPIs
+  const [latestYear, setLatestYear] = useState(null);
+  const [totalPopLatest, setTotalPopLatest] = useState(null);
+  const [countriesCount, setCountriesCount] = useState(0);
+  const [growthAbs, setGrowthAbs] = useState(null);
+  const [growthPct, setGrowthPct] = useState(null);
+  const [series, setSeries] = useState([]);
+
+  // === Cargar países ===
+  useEffect(() => {
+    let aborted = false;
+    const ac = new AbortController();
+    (async () => {
+      try {
+        setLoadingCountries(true);
+        setCountriesError("");
+        const res = await fetch(
+          "https://api.worldbank.org/v2/country?format=json&per_page=400",
+          { signal: ac.signal }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const items = Array.isArray(json) ? json[1] : [];
+        const list = (items || [])
+          .map((c) => ({ id: c.id, name: c.name })) // id = ISO3 (p.ej. WLD)
+          .sort((a, b) => a.name.localeCompare(b.name, "es"));
+
+        if (!aborted) setCountries(list);
+      } catch (e) {
+        if (!aborted) setCountriesError(e.message || "No se pudieron cargar los países");
+      } finally {
+        if (!aborted) setLoadingCountries(false);
+      }
+    })();
+    return () => {
+      aborted = true;
+      ac.abort();
+    };
+  }, []);
+
+  // === Aplicar filtros ===
+  const onApply = () => {
+    const hasCountry = !!selectedCountry?.id;
+    const hasAnyDate = !!yearFrom || !!yearTo;
+
+    let from = yearFrom;
+    let to = yearTo;
+    if (yearFrom && yearTo) {
+      const a = Math.min(Number(yearFrom), Number(yearTo)).toString();
+      const b = Math.max(Number(yearFrom), Number(yearTo)).toString();
+      from = a;
+      to = b;
+    }
+
+    // FIX: guardar por id y nombre (más robusto)
+    setAppliedCountryId(hasCountry ? selectedCountry.id : "");
+    setAppliedCountryName(hasCountry ? selectedCountry.name : "");
+    setAppliedFrom(hasAnyDate ? (from || to) : "");
+    setAppliedTo(hasAnyDate ? (to || from) : "");
+  };
+
+  const onReset = () => {
+    setSelectedCountry({ id: "", name: "" });
+    setYearFrom("");
+    setYearTo("");
+    setAppliedCountryId("");
+    setAppliedCountryName("");
+    setAppliedFrom("");
+    setAppliedTo("");
+  };
+
+  // === Auto-aplicar país si no hay fechas ===
+  const handleCountryChange = (val) => {
+    setSelectedCountry(val || { id: "", name: "" });
+    const noDates = !yearFrom && !yearTo;
+    if (noDates) {
+      setAppliedCountryId(val?.id || "");
+      setAppliedCountryName(val?.name || "");
+      setAppliedFrom("");
+      setAppliedTo("");
+    }
+  };
+
+  // === Tema ===
+  const getInitialTheme = () => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") return saved;
+    return "light";
+  };
+  const [theme, setTheme] = useState(getInitialTheme);
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+
+  // === Responsive / Sidebar ===
+  const [isMobile, setIsMobile] = useState(
+    () => window.matchMedia("(max-width: 820px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 820px)");
+    const onChange = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => window.matchMedia("(min-width: 821px)").matches
+  );
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 821px)");
+    const handler = (e) => setSidebarOpen(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+  const toggleSidebar = () => setSidebarOpen((v) => !v);
+  const closeSidebar = () => setSidebarOpen(false);
+
+  useEffect(() => {
+    document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isMobile, sidebarOpen]);
+
+  // === KPIs ===
+  const handleStats = (stats) => {
+    setLatestYear(stats.latestYear);
+    setTotalPopLatest(stats.totalPopLatest);
+    setCountriesCount(stats.countriesCount);
+    setGrowthAbs(stats.growthAbs);
+    setGrowthPct(stats.growthPct);
+    setSeries(stats.series || []);
+  };
+
+  const fmtNum = (n) => (n == null ? "—" : nf.format(Math.round(n)));
+  const fmtPct = (p) => (p == null ? "—" : `${(p * 100).toFixed(2)}%`);
+
+  return (
+    <div className={`layout ${sidebarOpen ? "sidebar-open" : "sidebar-hidden"}`}>
+      <Sidebar theme={theme} onToggleTheme={toggleTheme} />
+
+      {isMobile && sidebarOpen && (
+        <div className="backdrop show" onClick={closeSidebar} aria-hidden="true" />
+      )}
+
+      <main className="content">
+        <Topbar
+          title="World Population Dashboard"
+          subtitle="Datos en vivo de World Bank • SP.POP.TOTL"
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onToggleSidebar={toggleSidebar}
+          isMobile={isMobile}
+        />
+
+        {/* Filtros */}
+        <section className="panel">
+          <div className="panel-row">
+            <YearFilter
+              from={yearFrom}
+              to={yearTo}
+              onChangeFrom={setYearFrom}
+              onChangeTo={setYearTo}
+            />
+
+            <div className="field country">
+              <label>País</label>
+              <div style={{ minWidth: 240 }}>
+                <CountrySelect
+                  options={countries}
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                  disabled={loadingCountries}
+                />
+              </div>
+              {countriesError && <small className="text-danger">Error: {countriesError}</small>}
+            </div>
+
+            <div className="field">
+              <button type="button" className="btn primary" onClick={onApply}>Aplicar</button>
+              <button type="button" className="btn" onClick={onReset} style={{ marginLeft: 8 }}>Resetear</button>
+            </div>
+          </div>
+        </section>
+
+        {/* KPIs */}
+        <section className="cards">
+          <StatCard
+            title="Población Total"
+            value={fmtNum(totalPopLatest)}
+            hint={latestYear ? `personas (año ${latestYear})` : "personas"}
+          />
+          <StatCard title="Año más reciente" value={latestYear ?? "—"} hint="año" />
+          <StatCard title="Países" value={fmtNum(countriesCount)} hint="incluidos" />
+          <StatCard
+            title="Crecimiento"
+            value={
+              growthAbs == null
+                ? "—"
+                : `${fmtNum(growthAbs)} (${fmtPct(growthPct)})`
+            }
+            hint="vs. año previo"
+          />
+        </section>
+
+        {/* Chart + Tabla */}
+        <section className="grid-2">
+          <div className="panel">
+            <h3>Tendencia de población</h3>
+            <PopulationChart series={series} />
+          </div>
+
+          <div className="panel">
+            <h3>Registros de World Bank (SP.POP.TOTL)</h3>
+            <DataTable
+              countryId={appliedCountryId}      // FIX: ahora se pasa el id ISO3
+              countryName={appliedCountryName}  // solo para mostrar en UI
+              yearFrom={appliedFrom}
+              yearTo={appliedTo}
+       onStatsChange={handleStats}       // <- de aquí sale "series"
+            />
+          </div>
+        </section>
+
+        {/* Segundo gráfico */}
+        <TopCountriesPanel year={latestYear} top={10} />
+
+        <footer className="footer">
+          <span>World Bank API • SP.POP.TOTL • Datos reales</span>
+        </footer>
+      </main>
+    </div>
+  );
+}

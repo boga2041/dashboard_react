@@ -1,0 +1,70 @@
+/* ====== THEME: DARK (por defecto) ====== */
+:root{
+  --bg:#0b0f16;
+  --panel:#121826;
+  --panel-2:#0f1522;
+  --text:#e8ecf3;
+  --muted:#9aa4b2;
+  --primary:#6aa7ff;
+  --border:#1f2a3c;
+  --shadow: 0 8px 24px rgba(0,0,0,.35);
+  --body-bg: linear-gradient(180deg, #0b0f16, #0a0d13 60%);
+
+  /* NAV */
+  --nav-bg: var(--panel-2);
+  --nav-item-text: var(--muted);
+  --nav-item-border: var(--border);
+  --nav-item-hover-bg:#0f1a2c;
+  --nav-item-active-bg:#0f1a2c;
+  --nav-item-active-text: var(--text);
+}
+
+/* ====== THEME: LIGHT ====== */
+:root[data-theme="light"]{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --panel-2:#f4f6fb;
+  --text:#0e1726;
+  --muted:#64748b;
+  --primary:#2b6ffd;
+  --border:#e5e9f2;
+  --shadow: 0 8px 24px rgba(16,24,39,.08);
+  --body-bg: #f5f7fb;
+
+  /* NAV */
+  --nav-bg:#ffffff;
+  --nav-item-text:#4b5563;
+  --nav-item-border:#e6ebf3;
+  --nav-item-hover-bg:#e9eef9;
+  --nav-item-active-bg:#e2e8f8;
+  --nav-item-active-text:#0e1726;
+}
+/* ====== THEME: DARK (por defecto) ====== */
+:root{
+  /* ...tus variables actuales... */
+  --card-bg: linear-gradient(180deg, #121826, #101623);
+  --chart-bg: #0f1522;              /* antes estaba “hardcodeado” */
+  --table-row-hover: rgba(255,255,255,.02);
+}
+
+/* ====== THEME: LIGHT ====== */
+:root[data-theme="light"]{
+  /* ...tus variables actuales... */
+  --card-bg: #ffffff;               /* tarjetas blancas */
+  --chart-bg: #f4f6fb;              /* área del chart clara */
+  --table-row-hover: rgba(16,24,39,.04);
+}
+
+
+
+*{ box-sizing: border-box; }
+html,body,#root{ height:100%; }
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+  background: var(--body-bg);
+  color: var(--text);
+}
+a{ color: inherit; text-decoration: none; }
+h1,h2,h3{ margin:0 0 .5rem; }
+input,select,button{ font: inherit; }

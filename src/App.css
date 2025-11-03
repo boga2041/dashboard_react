@@ -1,0 +1,443 @@
+/* =======================
+   LAYOUT
+======================= */
+.layout{
+  display:grid;
+  grid-template-columns: 260px 1fr;
+  min-height:100dvh;
+  overflow-x: hidden;           /* evita scroll lateral al animar el sidebar */
+}
+.content{
+  padding: 24px;
+  display:flex;
+  flex-direction:column;
+  gap: 16px;
+  min-width: 0;                 /* IMPORTANT: previene que los hijos empujen el layout */
+}
+
+.topbar, .panel, .cards, .grid-2{ min-width: 0; }
+
+
+/* =======================
+   SIDEBAR / NAV
+======================= */
+.sidebar{
+  background: var(--nav-bg);
+  border-right:1px solid var(--nav-item-border);
+  padding: 24px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+
+  /* animación para mostrar/ocultar */
+  transform: translateX(0);
+  transition: transform .2s ease, opacity .2s ease;
+}
+.brand{ font-weight:700; letter-spacing:.4px; }
+.nav{ display:flex; flex-direction:column; gap:8px; }
+
+/* nav-item sirve para <a> y <button> */
+.nav-item{
+  appearance:none;
+  border:1px solid transparent;
+  background: transparent;
+  color: var(--nav-item-text);
+  padding:10px 12px;
+  border-radius:12px;
+  width:100%;
+  text-align:left;
+  cursor:pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, transform .06s ease;
+}
+.nav-item:hover{
+  background: var(--nav-item-hover-bg);
+  color: var(--nav-item-active-text);
+  border-color: var(--nav-item-border);
+}
+.nav-item:active{ transform: scale(.99); }
+.nav-item.active{
+  background: var(--nav-item-active-bg);
+  color: var(--nav-item-active-text);
+  border-color: var(--nav-item-border);
+  font-weight:600;
+}
+
+/* =======================
+   TOPBAR
+======================= */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap: wrap; /* móvil */
+}
+.topbar-titles{ min-width: 230px; }
+.title{ font-size: clamp(20px, 2.4vw, 28px); }
+.subtitle{ color: var(--muted); margin-top:2px; font-size:.95rem; }
+
+.topbar-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap: wrap;
+}
+.input-wrap{ min-width: 220px; flex: 1 1 280px; }
+.input{
+  width:100%;
+  background: var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 12px;
+  color: var(--text);
+}
+
+/* Botón icono (hamburguesa / sol-luna) */
+.icon-btn{
+  display:inline-flex;
+  align-items:center; justify-content:center;
+  width:40px; height:40px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform .06s ease, background .15s ease, border-color .15s ease;
+}
+.icon-btn:hover{ background: var(--nav-item-hover-bg); }
+.icon-btn:active{ transform: scale(.98); }
+
+/* Botón común */
+.btn{
+  background: transparent;
+  color: var(--text);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 14px;
+  cursor: pointer;                 /* ✅ normal */
+}
+.btn[disabled]{
+  opacity:.6;
+  cursor: not-allowed;             /* 🚫 solo si está disabled */
+}
+
+
+.btn.primary{
+  background: var(--primary);
+  border-color: transparent;
+  color:#0a0f18;
+  font-weight:600;
+  cursor: pointer;                 /* ✅ normal */
+}
+.btn.primary[disabled]{
+  opacity:.6;
+  cursor: not-allowed;             /* 🚫 solo si está disabled */
+}
+
+/* =======================
+   PANELS & CARDS
+======================= */
+.panel{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  box-shadow: var(--shadow);
+}
+/* Filtros — alineación consistente */
+
+.cards{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap:12px;
+}
+.card{
+  background: var(--card-bg);   /* variable de tema */
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+}
+.card-title{ color: var(--muted); font-size:.9rem; }
+.card-value{ font-size:1.8rem; font-weight:700; margin:6px 0; }
+.card-hint{ color: var(--muted); font-size:.85rem; }
+
+/* =======================
+   CHART PLACEHOLDER
+======================= */
+.chart-placeholder{
+  height: 280px;
+  display:flex; flex-direction:column; gap:12px;
+}
+.chart-grid{
+  flex:1; display:flex; align-items:flex-end; gap:8px;
+  padding: 8px; border:1px dashed #2a3957; border-radius:12px;
+  background: var(--chart-bg);  /* variable de tema */
+}
+.bar{
+  flex:1; min-width: 8px; border-radius:8px 8px 0 0;
+  background: linear-gradient(180deg, rgba(106,167,255,.9), rgba(106,167,255,.35));
+}
+.chart-legend{ color: var(--muted); font-size:.9rem; display:flex; gap:8px; align-items:center; }
+.dot{ width:10px; height:10px; border-radius:50%; background: var(--primary); display:inline-block; }
+
+/* =======================
+   TABLE
+======================= */
+.table-wrap{ overflow:auto; }
+.table{
+  width:100%; border-collapse: collapse; font-size:.95rem;
+}
+.table th, .table td{
+  padding:10px 12px; border-bottom:1px solid var(--border);
+  text-align:left;
+}
+.table th{ color: var(--muted); font-weight:600; }
+.table tbody tr:hover{ background: var(--table-row-hover); }
+
+/* =======================
+   GRID & FOOTER
+======================= */
+.grid-2{ display:grid; gap:12px; grid-template-columns: 1fr 1fr; }
+.footer{ color: var(--muted); font-size:.9rem; padding:12px 2px; }
+
+/* =======================
+   TRANSITIONS
+======================= */
+html, body, .content, .panel, .sidebar, .card, .table, .topbar, .nav-item, .btn, .input, .icon-btn{
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+
+/* =======================
+   SIDEBAR TOGGLE (drawer)
+======================= */
+/* oculto (desktop colapsado) */
+.layout.sidebar-hidden .sidebar{
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Backdrop (solo móvil) */
+.backdrop{
+  display:none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(2px);
+  z-index: 40;
+  opacity:0;
+  transition: opacity .2s ease;
+}
+.backdrop.show{ display:block; opacity:1; }
+
+/* =======================
+   RESPONSIVE
+======================= */
+@media (max-width: 1024px){
+  .cards{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .grid-2{ grid-template-columns: 1fr; }
+}
+@media (max-width: 820px){
+  .layout{ grid-template-columns: 1fr; }
+  .sidebar{
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 260px;
+    z-index: 50;
+    box-shadow: var(--shadow);
+  }
+  .layout.sidebar-hidden .sidebar{ transform: translateX(-100%); }
+  .layout.sidebar-open   .sidebar{ transform: translateX(0); }
+  .content{ padding:16px; }
+  .topbar-actions{ width:100%; }
+  .input-wrap{ flex: 1 1 100%; }
+}
+@media (min-width: 821px){
+  .layout.sidebar-hidden{ grid-template-columns: 0 1fr; } /* colapsa la columna del sidebar */
+}
+/* ===== FILTER BAR — una sola línea ===== */
+.panel-row{
+  display: flex;
+  flex-wrap: nowrap;        /* NO romper línea */
+  align-items: center;      /* centra verticalmente */
+  gap: 12px;
+  overflow-x: auto;         /* si no cabe, scroll horizontal */
+  overflow-y: hidden;
+  padding-bottom: 4px;      /* espacio para el scroll */
+  -webkit-overflow-scrolling: touch;
+}
+.panel-row > *{
+  flex: 0 0 auto;           /* ningún hijo se contrae ni rompe línea */
+  white-space: nowrap;      /* evita cortes raros de texto */
+}
+
+/* Campo compacto: label a la izquierda, select a la derecha */
+.field{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: max-content;   /* solo lo necesario */
+}
+.field label{
+  margin: 0;
+  font-size: .9rem;
+  color: var(--muted);
+  line-height: 1;
+}
+.field select{
+  height: 40px;             /* misma altura que el botón */
+  padding: 0 12px;
+  border:1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-2);
+  color: var(--text);
+  outline: none;
+}
+
+/* Botón aplicar con misma altura y sin encogerse */
+.btn.primary{
+  height: 40px;
+  line-height: 1;
+  padding: 0 16px;
+  border-radius: 12px;
+  flex: 0 0 auto;
+}
+
+
+
+
+
+/* --- Topbar: botón al MISMO nivel del título --- */
+.topbar{
+  position: sticky;
+  top: 0;                 /* estaba '16' sin px -> causa desplazamientos */
+  z-index: 70;            /* por encima del sidebar/drawer */
+  display: flex;
+  align-items: center;    /* alinea verticalmente botón + h1 */
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.topbar-left{
+  display: flex;
+  align-items: center;    /* asegura misma línea */
+  gap: 10px;
+  min-width: 230px;
+}
+
+/* botón menú (usa tu .icon-btn) */
+.menu-btn{
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  margin: 0;              /* sin saltos por margen */
+}
+
+/* normaliza márgenes/altura del título para centrar */
+.topbar-titles{ display:flex; flex-direction:column; }
+.topbar .title{
+  margin: 0;              /* quita margen por defecto del h1 */
+  line-height: 1.15;      /* centra con el botón */
+}
+.topbar .subtitle{
+  margin: 2px 0 0 0;
+}
+
+/* móvil */
+@media (max-width: 820px){
+  .topbar-actions{ width: 100%; }
+  .input-wrap{ flex: 1 1 100%; }
+}
+
+
+/* Cuando el drawer está abierto, la topbar va debajo del sidebar */
+.layout.sidebar-open .topbar { 
+  z-index: 30;              /* sidebar=50; backdrop=40 */
+}
+
+
+/* ===== DataTables x tu template ===== */
+
+/* El wrapper ocupa todo el ancho del panel */
+.table-wrap .dataTables_wrapper { width: 100%; color: var(--text); }
+
+/* Barra superior: length a la izq, buscar a la der */
+.table-wrap .dt-toolbar{
+  display:flex; align-items:center; gap:12px; margin-bottom:8px;
+}
+.table-wrap .dt-toolbar .dataTables_length,
+.table-wrap .dt-toolbar .dataTables_filter{
+  float:none !important;  /* anula floats de DT */
+  margin:0;
+}
+.table-wrap .dt-toolbar .dataTables_filter{ margin-left:auto; }
+
+/* Controles con tu estilo */
+.table-wrap .dataTables_filter input,
+.table-wrap .dataTables_length select{
+  background: var(--panel-2);
+  color: var(--text);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:8px 10px;
+  outline:none;
+}
+
+/* Tabla con tu estética */
+.table-wrap table.dataTable{
+  width:100% !important;
+  border-collapse:collapse;
+  background:transparent;
+}
+.table-wrap table.dataTable thead th,
+.table-wrap table.dataTable tbody td{
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  text-align:left; vertical-align:middle;
+}
+.table-wrap table.dataTable thead th{ color:var(--muted); font-weight:600; }
+.table-wrap table.dataTable.hover tbody tr:hover{ background: var(--table-row-hover); }
+.table-wrap table.dataTable.stripe tbody tr:nth-child(2n){
+  background: color-mix(in oklab, var(--panel) 94%, var(--text) 6%);
+}
+
+/* Scroll vertical del cuerpo (creado por scrollY) */
+.table-wrap .dataTables_scrollHead{ border-bottom:1px solid var(--border); }
+.table-wrap .dataTables_scrollBody{
+  border-bottom:1px solid var(--border);
+  overflow-y:auto !important;       /* asegura scroll interno */
+  overflow-x:hidden;                 /* evita barra horizontal */
+}
+
+/* Pie: info a la izq, paginación a la der */
+.table-wrap .dt-footer{
+  display:flex; align-items:center; gap:12px; margin-top:8px;
+}
+.table-wrap .dt-footer .dataTables_info{ order:1; color:var(--muted); }
+.table-wrap .dt-footer .dataTables_paginate{ order:2; margin-left:auto; }
+
+/* Botones de paginación */
+.table-wrap .dataTables_paginate .paginate_button{
+  border:1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text) !important;
+  border-radius:8px;
+  padding:6px 10px; margin:0 2px; box-shadow:none;
+}
+.table-wrap .dataTables_paginate .paginate_button:hover{
+  background: var(--nav-item-hover-bg);
+  border-color: var(--border);
+}
+.table-wrap .dataTables_paginate .paginate_button.current{
+  background: var(--primary);
+  color:#0a0f18 !important;
+  border-color: transparent;
+}
+
+/* Limpieza de floats por si DT inserta alguno */
+.table-wrap .dataTables_wrapper::after{ content:""; display:table; clear:both; }
+
+
+
+
