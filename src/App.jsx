@@ -1,5 +1,8 @@
 // src/App.jsx
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+
 import "./index.css";
 import "./App.css";
 
@@ -21,7 +24,7 @@ export default function App() {
   const [yearTo, setYearTo] = useState("");
 
   // Filtros aplicados (los que usa la tabla)
-  const [appliedCountryId, setAppliedCountryId] = useState("");     // FIX: por id ISO3
+  const [appliedCountryId, setAppliedCountryId] = useState(""); // FIX: por id ISO3
   const [appliedCountryName, setAppliedCountryName] = useState("");
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
@@ -60,7 +63,8 @@ export default function App() {
 
         if (!aborted) setCountries(list);
       } catch (e) {
-        if (!aborted) setCountriesError(e.message || "No se pudieron cargar los países");
+        if (!aborted)
+          setCountriesError(e.message || "No se pudieron cargar los países");
       } finally {
         if (!aborted) setLoadingCountries(false);
       }
@@ -71,10 +75,56 @@ export default function App() {
     };
   }, []);
 
+  // === Tema ===
+  const getInitialTheme = () => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") return saved;
+    return "light";
+  };
+
+  const [theme, setTheme] = useState(getInitialTheme);
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+
+  // 🔔 Helper: alerta que respeta el tema
+  const showThemedAlert = ({ icon = "info", title = "", text = "" }) => {
+    const isDark = theme === "dark";
+
+    Swal.fire({
+      icon,
+      title,
+      text,
+      background: isDark ? "#020617" : "#ffffff",
+      color: isDark ? "#e5e7eb" : "#020617",
+      confirmButtonText: "Aceptar",
+      iconColor: isDark ? "#38bdf8" : undefined,
+      confirmButtonColor: "#4f46e5",
+      buttonsStyling: false,
+      customClass: {
+        confirmButton: "btn primary",
+      },
+    });
+  };
+
   // === Aplicar filtros ===
   const onApply = () => {
     const hasCountry = !!selectedCountry?.id;
-    const hasAnyDate = !!yearFrom || !!yearTo;
+    const hasFrom = !!yearFrom;
+    const hasTo = !!yearTo;
+    const hasAnyDate = hasFrom || hasTo;
+
+    // ❌ No dejar aplicar si todo va vacío
+    if (!hasCountry && !hasAnyDate) {
+      showThemedAlert({
+        icon: "warning",
+        title: "Sin filtros",
+        text: "Selecciona al menos un rango de años o un país antes de aplicar.",
+      });
+      return;
+    }
 
     let from = yearFrom;
     let to = yearTo;
@@ -90,6 +140,27 @@ export default function App() {
     setAppliedCountryName(hasCountry ? selectedCountry.name : "");
     setAppliedFrom(hasAnyDate ? (from || to) : "");
     setAppliedTo(hasAnyDate ? (to || from) : "");
+
+    // 🔔 Mensajes según el tipo de filtro
+    if (hasCountry && hasAnyDate) {
+      showThemedAlert({
+        icon: "success",
+        title: "Filtros aplicados",
+        text: `Se filtró por país (${selectedCountry.name}) y por rango de años.`,
+      });
+    } else if (hasAnyDate) {
+      showThemedAlert({
+        icon: "success",
+        title: "Filtro por fecha",
+        text: "Se aplicó el filtro por rango de años.",
+      });
+    } else if (hasCountry) {
+      showThemedAlert({
+        icon: "success",
+        title: "Filtro por país",
+        text: `Se aplicó el filtro para ${selectedCountry.name}.`,
+      });
+    }
   };
 
   const onReset = () => {
@@ -100,6 +171,13 @@ export default function App() {
     setAppliedCountryName("");
     setAppliedFrom("");
     setAppliedTo("");
+
+    // 🔔 Aviso de limpieza
+    showThemedAlert({
+      icon: "info",
+      title: "Filtros reseteados",
+      text: "Se limpiaron los filtros y la tabla vuelve al estado inicial.",
+    });
   };
 
   // === Auto-aplicar país si no hay fechas ===
@@ -113,19 +191,6 @@ export default function App() {
       setAppliedTo("");
     }
   };
-
-  // === Tema ===
-  const getInitialTheme = () => {
-    const saved = localStorage.getItem("theme");
-    if (saved === "light" || saved === "dark") return saved;
-    return "light";
-  };
-  const [theme, setTheme] = useState(getInitialTheme);
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
   // === Responsive / Sidebar ===
   const [isMobile, setIsMobile] = useState(
@@ -152,7 +217,9 @@ export default function App() {
 
   useEffect(() => {
     document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isMobile, sidebarOpen]);
 
   // === KPIs ===
@@ -173,7 +240,11 @@ export default function App() {
       <Sidebar theme={theme} onToggleTheme={toggleTheme} />
 
       {isMobile && sidebarOpen && (
-        <div className="backdrop show" onClick={closeSidebar} aria-hidden="true" />
+        <div
+          className="backdrop show"
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
       )}
 
       <main className="content">
@@ -206,12 +277,29 @@ export default function App() {
                   disabled={loadingCountries}
                 />
               </div>
-              {countriesError && <small className="text-danger">Error: {countriesError}</small>}
+              {countriesError && (
+                <small className="text-danger">
+                  Error: {countriesError}
+                </small>
+              )}
             </div>
 
             <div className="field">
-              <button type="button" className="btn primary" onClick={onApply}>Aplicar</button>
-              <button type="button" className="btn" onClick={onReset} style={{ marginLeft: 8 }}>Resetear</button>
+              <button
+                type="button"
+                className="btn primary"
+                onClick={onApply}
+              >
+                Aplicar
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={onReset}
+                style={{ marginLeft: 8 }}
+              >
+                Resetear
+              </button>
             </div>
           </div>
         </section>
@@ -246,11 +334,11 @@ export default function App() {
           <div className="panel">
             <h3>Registros de World Bank (SP.POP.TOTL)</h3>
             <DataTable
-              countryId={appliedCountryId}      // FIX: ahora se pasa el id ISO3
-              countryName={appliedCountryName}  // solo para mostrar en UI
+              countryId={appliedCountryId} // FIX: ahora se pasa el id ISO3
+              countryName={appliedCountryName} // solo para mostrar en UI
               yearFrom={appliedFrom}
               yearTo={appliedTo}
-       onStatsChange={handleStats}       // <- de aquí sale "series"
+              onStatsChange={handleStats} // <- de aquí sale "series"
             />
           </div>
         </section>
