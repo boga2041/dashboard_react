@@ -1,6 +1,6 @@
 # 🌍 World Population Dashboard (React + Vite)
 
-**Autor:** *Tu nombre*\
+**Autor:** *Jose Ramon Bogarin*\
 **Versión:** v0.1\
 **Descripción:**\
 Este proyecto es un **Dashboard interactivo** que consume datos reales
@@ -39,7 +39,7 @@ npm run build
 npm test
 ```
 
-El proyecto se abre en **http://localhost:5173/** (por defecto en Vite).
+El proyecto se abre en **https://dashboard-react-ivory.vercel.app/** (por defecto en Vite).
 
 ------------------------------------------------------------------------
 
@@ -161,7 +161,68 @@ Puedes usarlo, modificarlo y distribuirlo libremente citando al autor.
 
 ## 👨‍💻 Autor
 
-**Tu nombre o alias**\
+**Jose Ramon bogarin o boga**\
 Desarrollador Frontend --- *React / Accesibilidad / UI Testing*\
 📧 tuemail@example.com\
-🌐 \[Tu portafolio o GitHub\]
+🌐 **Demo en línea:** [https://bogarwick.vercel.app/](https://bogarwick.vercel.app/)  
+📦 **Código fuente:** [https://github.com/boga2041/dasboot](https://github.com/boga2041/dashboard_react)
+
+
+
+---
+
+## 🧩 Suposiciones y Problemas Conocidos
+
+### Suposiciones
+
+- La **API del Banco Mundial** (`https://api.worldbank.org`) está disponible y responde dentro de tiempos razonables.
+- El indicador de población usado es siempre **`SP.POP.TOTL`** y mantiene el mismo formato de respuesta JSON.
+- El rango de años útil para el dashboard es aproximadamente **1960–2024**, por lo que en la llamada se usa `per_page=20000` asumiendo que:
+  - En ese rango entran todos los registros relevantes.
+  - No es necesario paginar de forma manual desde el cliente.
+- El usuario cuenta con:
+  - Un **navegador moderno** (Chrome, Edge, Firefox, etc.).
+  - Una **conexión a Internet estable** (la aplicación no funciona offline).
+- El filtrado por país se hace por **nombre exacto** (coincidencia completa con el nombre que devuelve la API del World Bank).
+- No se implementó autenticación ni manejo de usuarios: el dashboard está pensado como una herramienta de consulta abierta.
+
+### Problemas conocidos / Limitaciones
+
+- ⚠️ **Rendimiento al cargar datos de la tabla**  
+  - La primera carga del componente `DataTable` trae aproximadamente **17,000–20,000 registros** desde la API del World Bank (todos los países y años del rango seleccionado).
+  - Esto puede provocar:
+    - Un pequeño **retardo inicial** al cargar la tabla.
+    - Un uso de memoria más alto de lo ideal.
+- ⚠️ **Rendimiento al aplicar filtros de país**  
+  - El filtrado por país (`countryName`) se hace **en el cliente** usando DataTables sobre todos los registros ya cargados.
+  - Con tantos registros, al aplicar o cambiar el filtro se puede notar que la interfaz se vuelve **lenta** por unos instantes (especialmente en equipos menos potentes).
+  - Esta decisión se tomó para simplificar la lógica (cargar una vez y reutilizar los datos) a costa de rendimiento cuando hay muchos registros.
+- 🌐 **Dependencia total de la API externa**  
+  - Si la API del World Bank:
+    - Está caída,
+    - Responde muy lento,
+    - O cambia el formato de la respuesta,
+  - el dashboard puede dejar de mostrar datos o lanzar mensajes de error.  
+  Actualmente no hay:
+    - Sistema de reintentos automáticos.
+    - Caché local de respuestas.
+- 🔍 **Limitaciones del filtro por país**  
+  - El filtro por país usa una búsqueda de coincidencia exacta (`^Nombre País$`) sobre el nombre devuelto por la API.
+  - No permite:
+    - Filtrar por varios países a la vez.
+    - Búsquedas parciales o por código ISO (eso se maneja solo en la lógica interna, no en el UI).
+- 📱 **Limitaciones de diseño responsivo en tabla**  
+  - La tabla (`DataTable`) usa un alto fijo con `scrollY: 360`, lo que en pantallas muy pequeñas puede obligar a hacer algo de scroll extra dentro del panel.
+  - No se han optimizado todos los casos extremos de viewport muy estrechos, ya que el foco principal fue la experiencia en desktop y tablets.
+- 📊 **Cobertura parcial de datos**  
+  - Las series agregadas (`series`, `totalsByYear`, `countryTotalsLatest`) dependen totalmente de los datos que existan en la API.
+  - Si un país no tiene datos para cierto año:
+    - No aparece en el top de población para ese año.
+    - Puede generar “saltos” en la gráfica de tendencia.
+
+### Posibles mejoras futuras
+
+- Implementar **paginación real en servidor** o llamadas más segmentadas (por país / por rango de años más pequeño) para mejorar el rendimiento con muchos registros.
+- Añadir **filtros más avanzados** en la tabla (búsqueda por código ISO, por región, etc.).
+- Agregar **caché** de respuestas de la API para reducir llamadas repetidas.
+- Mejorar el soporte para pantallas muy pequeñas en la tabla (alternativas como vista compacta o tabla simplificada).
