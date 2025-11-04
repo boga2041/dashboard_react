@@ -168,6 +168,18 @@ Desarrollador Frontend --- *React / Accesibilidad / UI Testing*\
 📦 **Código fuente:** [https://github.com/boga2041/dasboot](https://github.com/boga2041/dashboard_react)
 
 
+## 📸 Capturas de pantalla
+
+### Vista general del Dashboard
+![Vista general del Dashboard](./public/screenshots/dashboard.png)
+
+### Filtros por país y año
+![Filtros aplicados en la tabla](./public/screenshots/filtros.png)
+
+### Tema oscuro
+![Tema oscuro del dashboard](./public/screenshots/tema-oscuro.png)
+
+
 
 ---
 
