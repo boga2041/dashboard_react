@@ -161,11 +161,20 @@ Puedes usarlo, modificarlo y distribuirlo libremente citando al autor.
 
 ## 👨‍💻 Autor
 
-**Jose Ramon bogarin**\
-Desarrollador Frontend --- *React / Accesibilidad / UI Testing*\
-📧 rbogarin30@gmail.com\
-🌐 **Demo en línea:** [https://bogarwick.vercel.app/](https://bogarwick.vercel.app/)  
+**José Ramón Bogarín**  
+Desarrollador Frontend — *React / Accesibilidad / UI Testing*  
+📧 **rbogarin30@gmail.com**
+
+---
+
+# 🌍 World Population Dashboard (Vite + React)
+
+Dashboard interactivo que muestra datos de población mundial usando la API del Banco Mundial (**SP.POP.TOTL**).
+
+👤 **Portafolio:** [https://bogarwick.vercel.app/](https://bogarwick.vercel.app/)  
+🌐 **Demo en línea:** [https://dashboard-react-ivory.vercel.app/](https://dashboard-react-ivory.vercel.app/)  
 📦 **Código fuente:** [https://github.com/boga2041/dashboard_react](https://github.com/boga2041/dashboard_react)
+
 
 
 ## 📸 Capturas de pantalla
