@@ -177,23 +177,27 @@ export function PopulationChart({ series = [], showLegend = true }) {
         )}
 
         {/* puntos interactivos */}
-        {model.points.map((p, i) => (
-          <g
-            key={i}
-            tabIndex={0}
-            onFocus={() => setHoverIdx(i)}
-            onBlur={() => setHoverIdx(null)}
-            aria-label={`Año ${series[i].year}, total ${nf.format(Math.round(series[i].total))}`}
-          >
-            <circle
-              cx={p[0]}
-              cy={p[1]}
-              r={hoverIdx === i ? 3.6 : 2.4}
-              fill="var(--primary)"
-              opacity={hoverIdx == null || hoverIdx === i ? 1 : 0.5}
-            />
-          </g>
-        ))}
+   {model.points.map((p, i) => (
+  <g
+    key={i}
+    tabIndex={0}
+    onFocus={() => setHoverIdx(i)}
+    onBlur={() => setHoverIdx(null)}
+    role="group"
+    aria-label={`Año ${series[i].year}, total ${nf.format(
+      Math.round(series[i].total)
+    )}`}
+  >
+    <circle
+      cx={p[0]}
+      cy={p[1]}
+      r={hoverIdx === i ? 3.6 : 2.4}
+      fill="var(--primary)"
+      opacity={hoverIdx == null || hoverIdx === i ? 1 : 0.5}
+    />
+  </g>
+))}
+
 
         {/* guía vertical + punto destacado */}
         {hovered && (

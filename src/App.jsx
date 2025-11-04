@@ -18,13 +18,16 @@ import TopCountriesPanel from "./components/TopCountriesPanel";
 const nf = new Intl.NumberFormat("es-ES");
 
 export default function App() {
+  // ID accesible para el selector de país
+  const COUNTRY_SELECT_ID = "country-select";
+
   // Controles de UI
   const [selectedCountry, setSelectedCountry] = useState({ id: "", name: "" });
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
 
   // Filtros aplicados (los que usa la tabla)
-  const [appliedCountryId, setAppliedCountryId] = useState(""); // FIX: por id ISO3
+  const [appliedCountryId, setAppliedCountryId] = useState(""); // id ISO3
   const [appliedCountryName, setAppliedCountryName] = useState("");
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
@@ -58,7 +61,7 @@ export default function App() {
         const json = await res.json();
         const items = Array.isArray(json) ? json[1] : [];
         const list = (items || [])
-          .map((c) => ({ id: c.id, name: c.name })) // id = ISO3 (p.ej. WLD)
+          .map((c) => ({ id: c.id, name: c.name })) // id = ISO3
           .sort((a, b) => a.name.localeCompare(b.name, "es"));
 
         if (!aborted) setCountries(list);
@@ -135,13 +138,11 @@ export default function App() {
       to = b;
     }
 
-    // FIX: guardar por id y nombre (más robusto)
     setAppliedCountryId(hasCountry ? selectedCountry.id : "");
     setAppliedCountryName(hasCountry ? selectedCountry.name : "");
     setAppliedFrom(hasAnyDate ? (from || to) : "");
     setAppliedTo(hasAnyDate ? (to || from) : "");
 
-    // 🔔 Mensajes según el tipo de filtro
     if (hasCountry && hasAnyDate) {
       showThemedAlert({
         icon: "success",
@@ -172,7 +173,6 @@ export default function App() {
     setAppliedFrom("");
     setAppliedTo("");
 
-    // 🔔 Aviso de limpieza
     showThemedAlert({
       icon: "info",
       title: "Filtros reseteados",
@@ -212,15 +212,31 @@ export default function App() {
     mql.addEventListener("change", handler);
     return () => mql.removeEventListener("change", handler);
   }, []);
+
   const toggleSidebar = () => setSidebarOpen((v) => !v);
   const closeSidebar = () => setSidebarOpen(false);
 
+  // Bloquear scroll cuando el sidebar está abierto en móvil
   useEffect(() => {
     document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
   }, [isMobile, sidebarOpen]);
+
+  // Cerrar sidebar con Escape (especialmente útil en móvil)
+  useEffect(() => {
+    if (!sidebarOpen) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [sidebarOpen]);
 
   // === KPIs ===
   const handleStats = (stats) => {
@@ -237,7 +253,11 @@ export default function App() {
 
   return (
     <div className={`layout ${sidebarOpen ? "sidebar-open" : "sidebar-hidden"}`}>
-      <Sidebar theme={theme} onToggleTheme={toggleTheme} />
+      <Sidebar
+        id="main-sidebar"
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
 
       {isMobile && sidebarOpen && (
         <div
@@ -247,18 +267,24 @@ export default function App() {
         />
       )}
 
-      <main className="content">
-        <Topbar
-          title="World Population Dashboard"
-          subtitle="Datos en vivo de World Bank • SP.POP.TOTL"
-          theme={theme}
-          onToggleTheme={toggleTheme}
-          onToggleSidebar={toggleSidebar}
-          isMobile={isMobile}
-        />
+      <main className="content" role="main">
+     <Topbar
+  title="World Population Dashboard"
+  subtitle="Datos en vivo de World Bank • SP.POP.TOTL"
+  theme={theme}
+  onToggleTheme={toggleTheme}
+  onToggleSidebar={toggleSidebar}
+  showThemeToggle={true}
+  sidebarOpen={sidebarOpen}
+/>
 
-        {/* Filtros */}
-        <section className="panel">
+
+        {/* Sección Resumen: filtros + KPIs */}
+        <section
+          id="resumen"
+          className="panel"
+          aria-label="Filtros de país y rango de años"
+        >
           <div className="panel-row">
             <YearFilter
               from={yearFrom}
@@ -268,20 +294,23 @@ export default function App() {
             />
 
             <div className="field country">
-              <label>País</label>
+              <label htmlFor={COUNTRY_SELECT_ID}>País</label>
               <div style={{ minWidth: 240 }}>
                 <CountrySelect
+                  id={COUNTRY_SELECT_ID}
                   options={countries}
                   value={selectedCountry}
                   onChange={handleCountryChange}
                   disabled={loadingCountries}
                 />
               </div>
-              {countriesError && (
-                <small className="text-danger">
-                  Error: {countriesError}
-                </small>
-              )}
+              <div aria-live="polite" aria-atomic="true">
+                {countriesError && (
+                  <small className="text-danger" role="status">
+                    Error: {countriesError}
+                  </small>
+                )}
+              </div>
             </div>
 
             <div className="field">
@@ -305,14 +334,26 @@ export default function App() {
         </section>
 
         {/* KPIs */}
-        <section className="cards">
+        <section
+          className="cards"
+          aria-label="Indicadores clave de población"
+          aria-live="polite"
+        >
           <StatCard
             title="Población Total"
             value={fmtNum(totalPopLatest)}
             hint={latestYear ? `personas (año ${latestYear})` : "personas"}
           />
-          <StatCard title="Año más reciente" value={latestYear ?? "—"} hint="año" />
-          <StatCard title="Países" value={fmtNum(countriesCount)} hint="incluidos" />
+          <StatCard
+            title="Año más reciente"
+            value={latestYear ?? "—"}
+            hint="año"
+          />
+          <StatCard
+            title="Países"
+            value={fmtNum(countriesCount)}
+            hint="incluidos"
+          />
           <StatCard
             title="Crecimiento"
             value={
@@ -325,7 +366,11 @@ export default function App() {
         </section>
 
         {/* Chart + Tabla */}
-        <section className="grid-2">
+        <section
+          id="series"
+          className="grid-2"
+          aria-label="Tendencias y registros de población mundial"
+        >
           <div className="panel">
             <h3>Tendencia de población</h3>
             <PopulationChart series={series} />
@@ -334,17 +379,22 @@ export default function App() {
           <div className="panel">
             <h3>Registros de World Bank (SP.POP.TOTL)</h3>
             <DataTable
-              countryId={appliedCountryId} // FIX: ahora se pasa el id ISO3
-              countryName={appliedCountryName} // solo para mostrar en UI
+              countryId={appliedCountryId}
+              countryName={appliedCountryName}
               yearFrom={appliedFrom}
               yearTo={appliedTo}
-              onStatsChange={handleStats} // <- de aquí sale "series"
+              onStatsChange={handleStats}
             />
           </div>
         </section>
 
-        {/* Segundo gráfico */}
-        <TopCountriesPanel year={latestYear} top={10} />
+        {/* Segundo gráfico: Top países */}
+        <section
+          id="acerca"
+          aria-label="Top de países por población"
+        >
+          <TopCountriesPanel year={latestYear} top={10} />
+        </section>
 
         <footer className="footer">
           <span>World Bank API • SP.POP.TOTL • Datos reales</span>

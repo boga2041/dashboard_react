@@ -30,12 +30,13 @@ export function Topbar({
   onToggleSidebar,
   showThemeToggle = true, // <- control explícito (por defecto visible)
   debug = false,
+  sidebarOpen = false,    // <- NUEVO: estado del sidebar para accesibilidad
 }) {
   if (debug) window.__DEBUG__ = true;
 
   // ===== Validaciones de props =====
-  const safeTitle = useMemo(() => (title ?? "—"), [title]);
-  const safeSubtitle = useMemo(() => (subtitle ?? ""), [subtitle]);
+  const safeTitle = useMemo(() => title ?? "—", [title]);
+  const safeSubtitle = useMemo(() => subtitle ?? "", [subtitle]);
 
   if (onToggleTheme && typeof onToggleTheme !== "function") {
     warn("`onToggleTheme` no es función", onToggleTheme);
@@ -87,8 +88,10 @@ export function Topbar({
           className="icon-btn menu-btn"
           aria-label="Abrir/cerrar menú"
           title="Abrir/cerrar menú"
-          onClick={handleSidebar}
           type="button"
+          onClick={handleSidebar}
+          aria-expanded={sidebarOpen}
+          aria-controls="main-sidebar"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
             <path
@@ -106,12 +109,19 @@ export function Topbar({
         </div>
       </div>
 
-      <div className="topbar-actions" aria-live="polite" aria-label={ariaThemeLabel}>
+      <div
+        className="topbar-actions"
+        aria-live="polite"
+        aria-label={ariaThemeLabel}
+      >
         {showThemeToggle ? (
           <ThemeToggle theme={theme} onToggle={handleTheme} />
         ) : (
           // placeholder para no “saltar” layout si decides ocultarlo
-          <span style={{ width: 20, height: 20, display: "inline-block" }} aria-hidden />
+          <span
+            style={{ width: 20, height: 20, display: "inline-block" }}
+            aria-hidden
+          />
         )}
       </div>
     </header>

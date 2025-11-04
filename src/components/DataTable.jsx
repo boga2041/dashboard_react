@@ -1,22 +1,22 @@
 // components/DataTable.jsx
-import 'datatables.net-dt/css/dataTables.dataTables.css';
-import DataTableLib from 'datatables.net-react';
-import DT from 'datatables.net-dt';
-import { useEffect, useMemo, useRef } from 'react';
+import "datatables.net-dt/css/dataTables.dataTables.css";
+import DataTableLib from "datatables.net-react";
+import DT from "datatables.net-dt";
+import { useEffect, useMemo, useRef } from "react";
 
 DataTableLib.use(DT);
 
-const nf = new Intl.NumberFormat('es-ES');
+const nf = new Intl.NumberFormat("es-ES");
 
 const columns = [
-  { title: "ISO",  data: "code" },
+  { title: "ISO", data: "code" },
   { title: "País", data: "name" },
   {
     title: "Población",
     data: "population",
     render: (d) => (d == null ? "—" : nf.format(d)),
   },
-  { title: "Año",  data: "year" },
+  { title: "Año", data: "year" },
 ];
 
 const API_BASE_URL = "https://api.worldbank.org/v2";
@@ -61,7 +61,7 @@ function buildUrl(yearFrom, yearTo) {
 }
 
 export function DataTable({
-  countryId = "",      // lo recibimos, pero NO lo usamos aquí
+  countryId = "", // lo recibimos, pero NO lo usamos aquí
   countryName = "",
   yearFrom = "",
   yearTo = "",
@@ -222,7 +222,7 @@ export function DataTable({
         }));
 
         dt.rows.add(rows);
-        applyFilters(dt);        // aplica país si hay
+        applyFilters(dt); // aplica país si hay
         computeAndEmitStats(dt); // KPIs para ese rango de años
       })
       .catch((err) => {
@@ -244,12 +244,17 @@ export function DataTable({
   }, [countryName]);
 
   return (
-    <div className="table-wrap">
+    <section
+      className="table-wrap"
+      role="region"
+      aria-label="Tabla de registros de población del Banco Mundial filtrados por país y años"
+    >
       <DataTableLib
         ref={tableRef}
         className="display stripe hover"
         options={options}
+        aria-label="Tabla de registros de población del Banco Mundial por país, población total y año"
       />
-    </div>
+    </section>
   );
 }

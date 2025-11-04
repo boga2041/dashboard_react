@@ -1,4 +1,3 @@
-// src/components/TopCountriesBar.jsx
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -34,7 +33,7 @@ export default function TopCountriesBar({ data = [], top = 10 }) {
 
   const options = {
     responsive: true,
-    maintainAspectRatio: false, // para que el contenedor controle la altura
+    maintainAspectRatio: false,
     plugins: {
       title: {
         display: false,
