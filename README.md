@@ -165,7 +165,7 @@ Puedes usarlo, modificarlo y distribuirlo libremente citando al autor.
 Desarrollador Frontend --- *React / Accesibilidad / UI Testing*\
 📧 rbogarin30@gmail.com\
 🌐 **Demo en línea:** [https://bogarwick.vercel.app/](https://bogarwick.vercel.app/)  
-📦 **Código fuente:** [https://github.com/boga2041/dasboot](https://github.com/boga2041/dashboard_react)
+📦 **Código fuente:** [https://github.com/boga2041/dashboard_react](https://github.com/boga2041/dashboard_react)
 
 
 ## 📸 Capturas de pantalla
